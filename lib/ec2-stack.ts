@@ -1,25 +1,11 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 // import { KeyPair } from 'cdk-ec2-key-pair';
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
 import { installDocker, installNode } from "./user-data";
-
-export class CdkWorkshopStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
-
-    // The code that defines your stack goes here
-
-    // example resource
-    const queue = new sqs.Queue(this, "CdkWorkshopQueue", {
-      visibilityTimeout: cdk.Duration.seconds(300),
-    });
-  }
-}
 
 export class Ec2CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -42,7 +28,7 @@ export class Ec2CdkStack extends cdk.Stack {
       vpc,
       description: "Allow SSH (TCP port 22) in",
       allowAllOutbound: true,
-      securityGroupName: "Lmaoo",
+      securityGroupName: "SG-Ec2CdkStack",
     });
     securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), "Allow SSH Access");
     securityGroup.addIngressRule(

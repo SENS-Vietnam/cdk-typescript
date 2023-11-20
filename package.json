@@ -1,8 +1,8 @@
 {
-  "name": "cdk-workshop",
+  "name": "cdk-starter",
   "version": "0.1.0",
   "bin": {
-    "cdk-workshop": "bin/cdk-workshop.js"
+    "cdk-starter": "bin/cdk-starter.js"
   },
   "scripts": {
     "build": "tsc",
