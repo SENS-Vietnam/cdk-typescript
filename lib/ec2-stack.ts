@@ -74,7 +74,7 @@ export class Ec2CdkStack extends cdk.Stack {
     const ec2Instance = new ec2.Instance(this, "Instance", {
       vpc,
       // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO),
-      instanceType: new ec2.InstanceType("t2.small"),
+      instanceType: new ec2.InstanceType("t2.micro"),
       machineImage,
       securityGroup: securityGroup,
       keyName: "hieu-playground",
