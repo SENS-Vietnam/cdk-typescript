@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 // import { KeyPair } from 'cdk-ec2-key-pair';
@@ -14,6 +15,7 @@ export class Ec2CdkStack extends cdk.Stack {
     // Create new VPC with 2 Subnets
     const vpc = new ec2.Vpc(this, "VPC", {
       natGateways: 0,
+      vpcName: "VPC-Ec2CdkStack",
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -36,6 +38,13 @@ export class Ec2CdkStack extends cdk.Stack {
       ec2.Port.tcpRange(3000, 9999),
       "Allow For web server"
     );
+
+    const _myBucket = new s3.Bucket(this, "ec2-cdk-stack-bucket", {
+      bucketName: "ec2-cdk-stack-bucket",
+      versioned: false,
+      publicReadAccess: false,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
 
     const role = new iam.Role(this, "ec2Role", {
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
@@ -65,10 +74,10 @@ export class Ec2CdkStack extends cdk.Stack {
     const ec2Instance = new ec2.Instance(this, "Instance", {
       vpc,
       // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO),
-      instanceType: new ec2.InstanceType("t2.micro"),
+      instanceType: new ec2.InstanceType("t2.small"),
       machineImage,
       securityGroup: securityGroup,
-      keyName: "CDK-TEST",
+      keyName: "hieu-playground",
       role: role,
     });
 
