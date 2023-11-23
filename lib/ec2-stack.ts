@@ -6,7 +6,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
 // import { KeyPair } from 'cdk-ec2-key-pair';
 import { Asset } from "aws-cdk-lib/aws-s3-assets";
-import { installDocker, installNode } from "./user-data";
+import { installAwsCli, installDocker, installNode } from "./user-data";
 
 export class Ec2CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -49,7 +49,8 @@ export class Ec2CdkStack extends cdk.Stack {
       allowAllOutbound: true,
       securityGroupName: "SG-Private-Ec2CdkStack",
     });
-    privateSG.addIngressRule(publicSG, ec2.Port.tcp(22), "Allow SSH Access");
+    privateSG.addIngressRule(publicSG, ec2.Port.tcp(22), "Allow SSH From public SG");
+    privateSG.addIngressRule(publicSG, ec2.Port.tcpRange(1000, 30000), "Allow curl from public SG");
 
     // const _myBucket = new s3.Bucket(this, "ec2-cdk-stack-bucket", {
     //   bucketName: "ec2-cdk-stack-bucket",
@@ -73,7 +74,13 @@ export class Ec2CdkStack extends cdk.Stack {
     //   cpuType: ec2.AmazonLinuxCpuType.X86_64,
     // });
     const userData = ec2.UserData.forLinux();
-    userData.addCommands(...installNode, ...installDocker);
+    userData.addCommands(
+      ...installNode,
+      ...installDocker,
+      ...installAwsCli,
+      "aws s3 cp s3://static-store-playground/server.js .",
+      "node server.js"
+    );
 
     const machineImage = ec2.MachineImage.fromSsmParameter(
       "/aws/service/canonical/ubuntu/server/focal/stable/current/amd64/hvm/ebs-gp2/ami-id",
@@ -108,31 +115,34 @@ export class Ec2CdkStack extends cdk.Stack {
     });
 
     // Create an asset that will be used as part of User Data to run on first load
-    // const asset = new Asset(this, "Asset", { path: path.join(__dirname, "../src/config.sh") });
-    const asset = new Asset(this, "Asset", {
-      path: path.join(__dirname, "../hieu-playground.pem"),
-    });
-    const localPath = ec2Instance.userData.addS3DownloadCommand({
-      bucket: asset.bucket,
-      bucketKey: asset.s3ObjectKey,
-    });
+    // // const asset = new Asset(this, "Asset", { path: path.join(__dirname, "../src/config.sh") });
+    // const asset = new Asset(this, "Asset", {
+    //   path: path.join(__dirname, "../hieu-playground.pem"),
+    // });
+    // const localPath = ec2Instance.userData.addS3DownloadCommand({
+    //   bucket: asset.bucket,
+    //   bucketKey: asset.s3ObjectKey,
+    // });
 
-    bastion.userData.addExecuteFileCommand({
-      filePath: localPath,
-      arguments: "--verbose -y",
-    });
-    asset.grantRead(bastion.role);
+    // bastion.userData.addExecuteFileCommand({
+    //   filePath: localPath,
+    //   arguments: "--verbose -y",
+    // });
+    // asset.grantRead(bastion.role);
+
+    const existingBucket = s3.Bucket.fromBucketName(
+      this,
+      "ExistingBucket",
+      "static-store-playground"
+    );
+    existingBucket.grantReadWrite(role);
 
     // Create outputs for connecting
     // new cdk.CfnOutput(this, "Bastion IP Address", { value: bastion.instancePublicIp });
     new cdk.CfnOutput(this, "EC2 IP Address", { value: ec2Instance.instancePrivateIp });
-    // new cdk.CfnOutput(this, 'Key Name', { value: key.keyPairName })
-    new cdk.CfnOutput(this, "Download Key Command", {
-      value:
-        "aws secretsmanager get-secret-value --secret-id ec2-ssh-key/cdk-keypair/private --query SecretString --output text > cdk-key.pem && chmod 400 cdk-key.pem",
-    });
+    // new cdk.CfnOutput(this, 'Bastion IP ', { value: ec2Instance.instancePrivateIp })
     new cdk.CfnOutput(this, "ssh command", {
-      value: "ssh -i cdk-key.pem -o IdentitiesOnly=yes ec2-user@" + bastion.instancePublicIp,
+      value: "ssh -i cdk-key.pem -o IdentitiesOnly=yes ubuntu@" + bastion.instancePublicIp,
     });
   }
 }
