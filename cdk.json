@@ -54,6 +54,29 @@
     "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
     "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
-    "@aws-cdk/aws-codepipeline-actions:useNewDefaultBranchForCodeCommitSource": true
+    "@aws-cdk/aws-codepipeline-actions:useNewDefaultBranchForCodeCommitSource": true,
+    "environment": "dev",
+
+    "dev": {
+      "region": "ap-southeast-1",
+      "prefix": "dev",
+      "existingVpcId": "",
+      "instances": [
+        {
+          "instanceId": "BastionHost",
+          "instanceType": "t3.small",
+          "keyName": "BastionHostKey",
+          "allowedSecurityGroups": []
+        }
+      ],
+      "vpcConfig": {
+        "cidr": "10.100.0.0/17",
+        "maxAZs": 1,
+        "isolatedSubnetCidrMask": 23,
+        "privateSubnetCidrMask": 20,
+        "publicSubnetCidrMask": 23,
+        "ssmPrefix": "/bastion/network"
+      }
+    }
   }
 }

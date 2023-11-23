@@ -1,0 +1,65 @@
+{
+  "ssm:account=053191768052:parameterName=/bastion/network/vpc/vpc-id:region=ap-southeast-1": "vpc-0062357dc0e66355c",
+  "vpc-provider:account=053191768052:filter.vpc-id=vpc-0062357dc0e66355c:region=ap-southeast-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-0062357dc0e66355c",
+    "vpcCidrBlock": "10.100.0.0/17",
+    "ownerAccountId": "053191768052",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "Public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-06d9ef60b536e64eb",
+            "cidr": "10.100.48.0/23",
+            "availabilityZone": "ap-southeast-1a",
+            "routeTableId": "rtb-074ceeddc2a3a9c18"
+          },
+          {
+            "subnetId": "subnet-068754afe4ac53532",
+            "cidr": "10.100.50.0/23",
+            "availabilityZone": "ap-southeast-1b",
+            "routeTableId": "rtb-0d58acebe54bc4888"
+          }
+        ]
+      },
+      {
+        "name": "Isolated",
+        "type": "Isolated",
+        "subnets": [
+          {
+            "subnetId": "subnet-058874a3159ee7e5e",
+            "cidr": "10.100.0.0/23",
+            "availabilityZone": "ap-southeast-1a",
+            "routeTableId": "rtb-08e5a43b1230697b1"
+          },
+          {
+            "subnetId": "subnet-0b895127e2564fb84",
+            "cidr": "10.100.2.0/23",
+            "availabilityZone": "ap-southeast-1b",
+            "routeTableId": "rtb-0e0771c39d08c5b0e"
+          }
+        ]
+      },
+      {
+        "name": "Private",
+        "type": "Private",
+        "subnets": [
+          {
+            "subnetId": "subnet-0bebe5b5ce049563c",
+            "cidr": "10.100.16.0/20",
+            "availabilityZone": "ap-southeast-1a",
+            "routeTableId": "rtb-0e526456f623f4d87"
+          },
+          {
+            "subnetId": "subnet-0b6472eace0d3754e",
+            "cidr": "10.100.32.0/20",
+            "availabilityZone": "ap-southeast-1b",
+            "routeTableId": "rtb-06391a123dd6b9dc7"
+          }
+        ]
+      }
+    ]
+  }
+}
