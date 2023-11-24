@@ -17,3 +17,10 @@ export const installDocker = [
   "sudo systemctl enable docker",
   "sudo usermod -aG docker $USER",
 ];
+//
+export const installAwsCli = [
+  "sudo apt update -y",
+  "sudo apt install -y awscli",
+  "sudo apt install -y python3-pip",
+  "sudo pip3 install awscli --upgrade",
+];
