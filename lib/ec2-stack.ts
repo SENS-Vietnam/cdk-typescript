@@ -1,6 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elb from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as targets from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as path from "path";
@@ -15,7 +17,7 @@ export class Ec2CdkStack extends cdk.Stack {
     // Create new VPC with 2 Subnets
     const vpc = new ec2.Vpc(this, "VPC", {
       vpcName: "VPC-Ec2CdkStack",
-      maxAzs: 1,
+      maxAzs: 2,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -109,6 +111,33 @@ export class Ec2CdkStack extends cdk.Stack {
       role: role,
     });
 
+    // ----------- LOAD BALANCER -------------
+    // Create a load balancer
+    const lbSecurityGroup = new ec2.SecurityGroup(this, "LBSecurityGroup", {
+      vpc,
+      // Add any necessary inbound rules for your load balancer
+    });
+
+    const loadBalancer = new elb.ApplicationLoadBalancer(this, "MyLoadBalancer", {
+      vpc,
+      internetFacing: true, // Set to true if you want it to be internet-facing
+      securityGroup: lbSecurityGroup,
+    });
+
+    // Create a target group for the load balancer
+    const targetGroup = new elb.ApplicationTargetGroup(this, "MyTargetGroup", {
+      vpc,
+      port: 9999, // Specify the port your server is running on
+      protocol: elb.ApplicationProtocol.HTTP,
+      targets: [new targets.InstanceTarget(privateInstance)], // Associate the target group with your EC2 instance
+    });
+    // Create a listener for the load balancer
+    loadBalancer.addListener("MyListener", {
+      port: 80,
+      defaultTargetGroups: [targetGroup],
+    });
+
+    // ------------- S3 SECTION  -----------------
     // ALLOW ec2 to download file from bucket "static-store-playground"
     // const _myBucket = new s3.Bucket(this, "ec2-cdk-stack-bucket", {
     //   bucketName: "ec2-cdk-stack-bucket",
@@ -124,6 +153,7 @@ export class Ec2CdkStack extends cdk.Stack {
     );
     existingBucket.grantReadWrite(role);
 
+    // ------------- OUTPUT SECTION  -----------------
     // Create outputs for connecting
     // new cdk.CfnOutput(this, "Bastion IP Address", { value: bastion.instancePublicIp });
     new cdk.CfnOutput(this, "Server  Private IP Address", {
