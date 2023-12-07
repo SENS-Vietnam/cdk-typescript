@@ -76,6 +76,8 @@ export class Ec2CdkStack extends cdk.Stack {
       ...installDocker,
       ...installAwsCli,
       //download file from s3 || replace by download images
+      // "docker pull 053191768052.dkr.ecr.ap-southeast-1.amazonaws.com/cdk-hnb659fds-container-assets-053191768052-ap-southeast-1:latest      ",
+      // "docker-compose up"
       "aws s3 cp s3://static-store-playground/server.js .",
       "node server.js"
     );
@@ -91,7 +93,7 @@ export class Ec2CdkStack extends cdk.Stack {
     const privateInstance = new ec2.Instance(this, "PrivateInstance", {
       vpc,
       // instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO),
-      instanceType: new ec2.InstanceType("t2.micro"),
+      instanceType: new ec2.InstanceType("t2.small"),
       machineImage,
       securityGroup: privateSG,
       keyName: "hieu-playground",
